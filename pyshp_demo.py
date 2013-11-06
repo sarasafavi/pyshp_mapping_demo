@@ -1,5 +1,8 @@
 import shapefile
 import json
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 def features(data, filter=None):
     """	Reads a given shapefile and returns its features (records) in geoJSON-like format.
@@ -13,12 +16,13 @@ def features(data, filter=None):
     field_names = [field[0] for field in fields]
 
 # TODO
-# gen1: yield records from Reader
-# gen2: yields only valid (__geo_interface__['coordinates'] != (0,0) ) recs
-# gen3: yields dict of specified attrs
+# validate geometries - dump bad/null geoms
+# some null geometries still return [invalid] coords - not (0,0)
 
     for r in sf.shapeRecords():
-        if r.shape.__geo_interface__['coordinates'] == (0,0):
+        coords = r.shape.__geo_interface__['coordinates']
+        logging.debug("%r %r", type(coords), coords)
+        if coords == (0,0):
             continue
         else:
             all_attr = dict(zip(field_names, r.record))
@@ -32,7 +36,7 @@ def features(data, filter=None):
 
 
 if __name__ == "__main__":
-    shp = "data/TX_Gazetteer"
+    shp = "data/gazetteer"
     filter_fields = ["NAME", "CLASS"]
     museums = []
 
