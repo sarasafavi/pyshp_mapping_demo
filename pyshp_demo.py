@@ -3,16 +3,19 @@ import json
 import logging
 
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 def features(data, filter=None):
-    """	Reads a given shapefile and returns its features (records) in geoJSON-like format.
-    If a filter is given, all fields not included in the filter will be dropped from output.
+    """	Reads a given shapefile and returns its features (records) in
+    geoJSON-like format. If a filter is given, all fields not included
+    in the filter will be dropped from output.
     data: path to shapefile
     filter: list of specific field names to include (default None)
     """
 
     sf = shapefile.Reader(data)
-    fields = sf.fields[1:] # sf.fields[0] == deletion flag
+    fields = sf.fields[1:]  # sf.fields[0] == deletion flag
     field_names = [field[0] for field in fields]
 
 # TODO
@@ -21,8 +24,8 @@ def features(data, filter=None):
 
     for r in sf.shapeRecords():
         coords = r.shape.__geo_interface__['coordinates']
-        logging.debug("%r %r", type(coords), coords)
-        if coords == (0,0):
+        logger.debug("%r %r", type(coords), coords)
+        if coords == (0, 0):
             continue
         else:
             all_attr = dict(zip(field_names, r.record))
@@ -32,7 +35,7 @@ def features(data, filter=None):
                 attr = all_attr
             geom = r.shape.__geo_interface__
 
-            yield dict(type="Feature", geometry=geom,properties=attr)
+            yield dict(type="Feature", geometry=geom, properties=attr)
 
 
 if __name__ == "__main__":
